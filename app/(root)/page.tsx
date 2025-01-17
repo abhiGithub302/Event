@@ -1,4 +1,4 @@
-// pages/index.tsx
+// page.tsx
 
 import CategoryFilter from '@/components/shared/CategoryFilter';
 import Collection from '@/components/shared/Collection';

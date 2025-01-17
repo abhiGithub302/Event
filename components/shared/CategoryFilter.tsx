@@ -13,7 +13,8 @@ import { formUrlQuery, removeKeysFromQuery } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const CategoryFilter = () => {
+// Add className to props to allow styling from the parent component
+const CategoryFilter = ({ className = "" }: { className?: string }) => {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -22,47 +23,56 @@ const CategoryFilter = () => {
     const getCategories = async () => {
       const categoryList = await getAllCategories();
 
-      categoryList && setCategories(categoryList as ICategory[])
+      if (categoryList) {
+        setCategories(categoryList as ICategory[]);
+      }
     }
 
     getCategories();
-  }, [])
+  }, []);
 
   const onSelectCategory = (category: string) => {
-      let newUrl = '';
+    let newUrl = '';
 
-      if(category && category !== 'All') {
-        newUrl = formUrlQuery({
-          params: searchParams.toString(),
-          key: 'category',
-          value: category
-        })
-      } else {
-        newUrl = removeKeysFromQuery({
-          params: searchParams.toString(),
-          keysToRemove: ['category']
-        })
-      }
+    if (category && category !== 'All') {
+      newUrl = formUrlQuery({
+        params: searchParams.toString(),
+        key: 'category',
+        value: category
+      });
+    } else {
+      newUrl = removeKeysFromQuery({
+        params: searchParams.toString(),
+        keysToRemove: ['category']
+      });
+    }
 
-      router.push(newUrl, { scroll: false });
-  }
+    router.push(newUrl, { scroll: false });
+  };
 
   return (
-    <Select onValueChange={(value: string) => onSelectCategory(value)}>
+    <Select onValueChange={(value: string) => onSelectCategory(value)} className={className}>
       <SelectTrigger className="select-field">
         <SelectValue placeholder="Category" />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="All" className="select-item p-regular-14">All</SelectItem>
 
-        {categories.map((category) => (
-          <SelectItem value={category.name} key={category._id} className="select-item p-regular-14">
-            {category.name}
+        {/* Map over categories only if available */}
+        {categories.length > 0 ? (
+          categories.map((category) => (
+            <SelectItem value={category.name} key={category._id} className="select-item p-regular-14">
+              {category.name}
+            </SelectItem>
+          ))
+        ) : (
+          <SelectItem value="loading" className="select-item p-regular-14">
+            Loading categories...
           </SelectItem>
-        ))}
+        )}
       </SelectContent>
     </Select>
-  )
+  );
 }
 
-export default CategoryFilter
+export default CategoryFilter;
