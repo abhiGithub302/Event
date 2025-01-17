@@ -13,7 +13,6 @@ import User from '../database/models/user.model';
 export const checkoutOrder = async (order: CheckoutOrderParams) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-  // Convert price to paisa (₹1 = 100 paisa)
   const price = order.isFree ? 0 : Number(order.price) * 100;
 
   try {
@@ -21,8 +20,8 @@ export const checkoutOrder = async (order: CheckoutOrderParams) => {
       line_items: [
         {
           price_data: {
-            currency: 'inr', // Changed to INR
-            unit_amount: price, // Amount in paisa
+            currency: 'usd',
+            unit_amount: price,
             product_data: {
               name: order.eventTitle
             }
@@ -39,11 +38,11 @@ export const checkoutOrder = async (order: CheckoutOrderParams) => {
       cancel_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/`,
     });
 
-    redirect(session.url!);
+    redirect(session.url!)
   } catch (error) {
     throw error;
   }
-};
+}
 
 export const createOrder = async (order: CreateOrderParams) => {
   try {
@@ -59,15 +58,15 @@ export const createOrder = async (order: CreateOrderParams) => {
   } catch (error) {
     handleError(error);
   }
-};
+}
 
 // GET ORDERS BY EVENT
 export async function getOrdersByEvent({ searchString, eventId }: GetOrdersByEventParams) {
   try {
-    await connectToDatabase();
+    await connectToDatabase()
 
-    if (!eventId) throw new Error('Event ID is required');
-    const eventObjectId = new ObjectId(eventId);
+    if (!eventId) throw new Error('Event ID is required')
+    const eventObjectId = new ObjectId(eventId)
 
     const orders = await Order.aggregate([
       {
@@ -109,21 +108,21 @@ export async function getOrdersByEvent({ searchString, eventId }: GetOrdersByEve
           $and: [{ eventId: eventObjectId }, { buyer: { $regex: RegExp(searchString, 'i') } }],
         },
       },
-    ]);
+    ])
 
-    return JSON.parse(JSON.stringify(orders));
+    return JSON.parse(JSON.stringify(orders))
   } catch (error) {
-    handleError(error);
+    handleError(error)
   }
 }
 
 // GET ORDERS BY USER
 export async function getOrdersByUser({ userId, limit = 3, page }: GetOrdersByUserParams) {
   try {
-    await connectToDatabase();
+    await connectToDatabase()
 
-    const skipAmount = (Number(page) - 1) * limit;
-    const conditions = { buyer: userId };
+    const skipAmount = (Number(page) - 1) * limit
+    const conditions = { buyer: userId }
 
     const orders = await Order.distinct('event._id')
       .find(conditions)
@@ -138,12 +137,12 @@ export async function getOrdersByUser({ userId, limit = 3, page }: GetOrdersByUs
           model: User,
           select: '_id firstName lastName',
         },
-      });
+      })
 
-    const ordersCount = await Order.distinct('event._id').countDocuments(conditions);
+    const ordersCount = await Order.distinct('event._id').countDocuments(conditions)
 
-    return { data: JSON.parse(JSON.stringify(orders)), totalPages: Math.ceil(ordersCount / limit) };
+    return { data: JSON.parse(JSON.stringify(orders)), totalPages: Math.ceil(ordersCount / limit) }
   } catch (error) {
-    handleError(error);
+    handleError(error)
   }
 }
