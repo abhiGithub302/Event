@@ -6,7 +6,6 @@ import { getAllEvents } from '@/lib/actions/event.actions';
 import { SearchParamProps } from '@/types';
 import Image from 'next/image';
 import Link from 'next/link';
-import banner from "/home/abhishek/Desktop/event_platform/public/assets/images/new.jpeg";
 
 export default async function Home({ searchParams }: SearchParamProps) {
   const page = Number(searchParams?.page) || 1;
@@ -40,7 +39,7 @@ export default async function Home({ searchParams }: SearchParamProps) {
 
           {/* Hero Image */}
           <Image
-          src={banner}
+          src="/public/assets/images/new.jpeg"
             alt="event showcase"
             width={900}
             height={700}
